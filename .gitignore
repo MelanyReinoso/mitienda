@@ -1,0 +1,16 @@
+# Dependencias y builds
+node_modules/
+dist/
+
+# Secretos: NUNCA se suben (cada uno crea el suyo a partir de .env.example)
+.env
+.env.*
+!.env.example
+
+# Imágenes subidas desde el panel
+backend/uploads/
+
+# Sistema y editor
+.DS_Store
+Thumbs.db
+*.log

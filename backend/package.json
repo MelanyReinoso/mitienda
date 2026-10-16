@@ -1,0 +1,23 @@
+{
+  "name": "mitienda-backend",
+  "version": "1.0.0",
+  "description": "API de la tienda online (Node + Express + MySQL)",
+  "type": "module",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "node --watch src/app.js",
+    "migrar": "node scripts/migrar.js",
+    "datos-demo": "node scripts/datosDemo.js",
+    "crear-admin": "node scripts/crearAdmin.js"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.23.2",
+    "nodemailer": "^6.9.16"
+  }
+}

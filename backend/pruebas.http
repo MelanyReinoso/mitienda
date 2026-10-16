@@ -1,0 +1,148 @@
+### ============================================================
+### Pruebas de la API sin necesidad de un frontend
+### Instalá en VS Code la extensión "REST Client" (autor: Huachao Mao).
+### Después, arriba de cada petición aparece "Send Request": hacé clic.
+### ============================================================
+
+@url = http://localhost:4100
+
+### 1) Ver el catálogo (público)
+GET {{url}}/productos
+
+### 2) Filtrar: por categoría y por texto
+GET {{url}}/productos?categoria=1&q=remera
+
+### 3) Un producto
+GET {{url}}/productos/1
+
+### 4) Crear una cuenta de cliente
+POST {{url}}/auth/registro
+Content-Type: application/json
+
+{
+  "nombre": "Ana",
+  "apellido": "Prueba",
+  "email": "ana@correo.com",
+  "password": "clave12345",
+  "telefono": "2641234567"
+}
+
+### 5) Iniciar sesión como cliente (guarda el token para las siguientes)
+# @name loginCliente
+POST {{url}}/auth/login
+Content-Type: application/json
+
+{ "email": "ana@correo.com", "password": "clave12345" }
+
+###
+@tokenCliente = {{loginCliente.response.body.token}}
+
+### 6) Comprar (los precios los calcula el servidor; probá cambiar "precio" y verás que lo ignora)
+POST {{url}}/pedidos
+Content-Type: application/json
+Authorization: Bearer {{tokenCliente}}
+
+{
+  "metodo_pago": "transferencia",
+  "id_envio": 1,
+  "direccion_envio": "San Martín 123, San Juan",
+  "items": [
+    { "id_variante": 1, "cantidad": 1, "precio": 1 },
+    { "id_variante": 3, "cantidad": 2 }
+  ]
+}
+
+### 7) Ver mis pedidos
+GET {{url}}/pedidos/mios
+Authorization: Bearer {{tokenCliente}}
+
+### 8) Un cliente NO puede entrar a lo de admin (debe dar 403)
+GET {{url}}/pedidos
+Authorization: Bearer {{tokenCliente}}
+
+### ------------------------- ADMINISTRADOR -------------------------
+### (antes creá el admin con:  npm run crear-admin)
+
+### 9) Iniciar sesión como admin
+# @name loginAdmin
+POST {{url}}/auth/login
+Content-Type: application/json
+
+{ "email": "TU_EMAIL_DE_ADMIN", "password": "TU_CLAVE_DE_ADMIN" }
+
+###
+@tokenAdmin = {{loginAdmin.response.body.token}}
+
+### 10) Ver todos los pedidos (opcional: ?estado=pendiente)
+GET {{url}}/pedidos
+Authorization: Bearer {{tokenAdmin}}
+
+### 11) Cambiar el estado de un pedido (pendiente → pagado → preparando → enviado → entregado)
+PUT {{url}}/pedidos/1/estado
+Content-Type: application/json
+Authorization: Bearer {{tokenAdmin}}
+
+{ "estado": "pagado" }
+
+### 12) Cancelar un pedido (devuelve el stock)
+PUT {{url}}/pedidos/1/estado
+Content-Type: application/json
+Authorization: Bearer {{tokenAdmin}}
+
+{ "estado": "cancelado" }
+
+### 13) Crear un producto con sus variantes
+POST {{url}}/productos
+Content-Type: application/json
+Authorization: Bearer {{tokenAdmin}}
+
+{
+  "nombre": "Short Deportivo",
+  "descripcion": "Short liviano para entrenar.",
+  "id_categoria": 3,
+  "variantes": [
+    { "talle": "M", "color": "Negro", "precio": 12500, "stock": 15 },
+    { "talle": "L", "color": "Negro", "precio": 12500, "stock": 10 }
+  ]
+}
+
+### 14) Cambiar precio/stock de una variante
+PUT {{url}}/variantes/1
+Content-Type: application/json
+Authorization: Bearer {{tokenAdmin}}
+
+{ "talle": "M", "color": "Negro", "precio": 45000, "stock": 20 }
+
+### 15) Ver todos los productos, incluso los ocultos
+GET {{url}}/productos/admin/todos
+Authorization: Bearer {{tokenAdmin}}
+
+
+### Recuperar contraseña: 1) pedir el link (mirá la terminal del backend, ahí aparece el link)
+POST {{url}}/auth/olvide
+Content-Type: application/json
+
+{ "email": "ana@correo.com" }
+
+### Recuperar contraseña: 2) usar el token que viene en el link
+POST {{url}}/auth/restablecer
+Content-Type: application/json
+
+{ "token": "PEGAR_ACA_EL_TOKEN_DEL_LINK", "password": "claveNueva123" }
+
+
+### Datos públicos de la tienda (nombre, color, contacto, medios de pago y envíos)
+GET {{url}}/tienda
+
+### Si el backend atiende varias tiendas, se elige con el header X-Tienda (el slug)
+GET {{url}}/tienda
+X-Tienda: mi-tienda
+
+
+### Cambiar la apariencia (admin). esquinas y grilla vacíos = lo que define el modelo
+PUT {{url}}/tienda/apariencia
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "tema": "urbano", "color_principal": "#8b7bff", "esquinas": "", "grilla": "normal",
+  "aviso": "Envío gratis desde $50.000", "portada_titulo": "Nueva temporada", "portada_texto": "" }
